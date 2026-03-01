@@ -56,7 +56,7 @@ function heuristicsFromText(rawInput: string): Partial<GeminiOutput> {
   if (/\benglish\b|англоговор/i.test(text)) out.language = "English";
   if (/\brussian\b|русскоговор/i.test(text)) out.language = out.language ? `${out.language}, Russian` : "Russian";
 
-  const nicheWords = [
+  const nicheRules: Array<[string, RegExp]> = [
     ["fitness", /\bfitness\b|фитнес/i],
     ["beauty", /\bbeauty\b|бьюти|космет/i],
     ["fashion", /\bfashion\b|мода/i],
@@ -64,7 +64,8 @@ function heuristicsFromText(rawInput: string): Partial<GeminiOutput> {
     ["travel", /\btravel\b|путешеств/i],
     ["food", /\bfood\b|еда|кулинар/i],
     ["tech", /\btech\b|техно|гаджет/i]
-  ].filter(([, re]) => re.test(text));
+  ];
+  const nicheWords = nicheRules.filter(([, re]) => re.test(text));
   if (nicheWords.length > 0) out.niches = nicheWords.map(([label]) => label).join(", ");
 
   const budgetMatch = text.match(
