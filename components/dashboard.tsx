@@ -313,6 +313,24 @@ export default function Dashboard({ userEmail, workspaceId, initialCreators, ini
     window.location.href = "/login";
   }
 
+  async function downloadPhoto(url: string, name: string) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to download image");
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${name || "creator-photo"}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+      setMessage(getErrorMessage(e, "Photo download failed"));
+    }
+  }
+
   return (
     <main className="container">
       <div className="topbar">
@@ -530,7 +548,25 @@ export default function Dashboard({ userEmail, workspaceId, initialCreators, ini
                     {c.gender || "-"} / {c.age_range || "-"} / {c.race || "-"}
                   </small>
                 </td>
-                <td>{c.photo_url ? <img src={c.photo_url} alt={c.name} width={70} height={70} /> : "-"}</td>
+                <td>
+                  {c.photo_url ? (
+                    <div className="grid" style={{ gap: 6 }}>
+                      <img src={c.photo_url} alt={c.name} width={70} height={70} />
+                      <div className="actions">
+                        <a href={c.photo_url} target="_blank" rel="noreferrer">
+                          <button className="secondary" type="button">
+                            Open
+                          </button>
+                        </a>
+                        <button className="secondary" type="button" onClick={() => downloadPhoto(c.photo_url!, c.name)}>
+                          Download
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    "-"
+                  )}
+                </td>
                 <td>
                   {c.country || "-"}
                   <br />
